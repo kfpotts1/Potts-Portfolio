@@ -12,8 +12,9 @@ This collection is always growing and improving! Keep checking in for more work!
  - Current Member of the **Cornell Data Science** Project Team
   - Working in **R**
  - Time series analysis of financial data - See my ongoing `Market_Normality` project in the `data_science` folder.
+  - Relies heavily on **Pandas**, **Numpy**, **Scipy**, **StatsModels**, and **Matplotlib**
  - Currently working on a project exploring Empirical Distributions of Touring Times of Non-Complete Graphs
-  - Will be working in **Cython**
+  - Working in **Cython**
   - To be uploaded soon
   
 ### Mathematics
