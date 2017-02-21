@@ -5,7 +5,7 @@ This collection is always growing and improving! Keep checking in for more work!
 
 ### Machine Learning
  - Currently taking CS5780 Machine Learning for Inteligent Systems at Cornell University
- - To see some of my work in machine learning, visit my `[klml_supervised](https://github.com/kfpotts1/klml_supervised)` repository.
+ - To see some of my work in machine learning, visit my [klml_supervised](https://github.com/kfpotts1/klml_supervised) repository.
  - Currently working in **Python**, looking into **Julia**
  
 ### Data Science
