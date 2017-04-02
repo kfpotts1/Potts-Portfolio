@@ -27,4 +27,5 @@ This collection is always growing and improving! Keep checking in for more work!
   
 ### Finance and Trading
  - Current member of the **Cornell University Algorithmic Trading Team**
+  - We are using machine learning models to supplement statistical arbitrage and momentum trading strategies.
  - `Market_Normality` research project as described above
