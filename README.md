@@ -19,7 +19,7 @@ This collection is always growing and improving! Keep checking in for more work!
   
 ### Mathematics
  - Empirical Distributions of Touring Times of Non-Complete Graphs, as described above
-  - I have started to collect some of this work in Jupyter notebooks in my [graph_tour_sim](https://github.com/kfpotts1/graph_tour_sim) repository.
+   - I have started to collect some of this work in Jupyter notebooks in my [graph_tour_sim](https://github.com/kfpotts1/graph_tour_sim) repository.
    - I have implemented the critical aspects of the project in **Cython** to speed up the simulations.
  - Study of the Thue-Morse Sequence
  - Study and implementation of Adaptive Quadrature
