@@ -1,8 +1,7 @@
 """
-q1.py
+analyze_text.py
 Created by Kenneth Potts
 April 20, 2017
-Galvanize Data Science Technical Assessment
 """
 
 import numpy as np
