@@ -5,6 +5,8 @@ import numpy as np
 import statsmodels.api as sm
 from statsmodels import regression
 import matplotlib.pyplot as plt
+from matplotlib import style
+style.use('seaborn-whitegrid')
 
 """
 Created on April 22 21:29:53 2017
@@ -22,9 +24,6 @@ NOTES:
  
 """
 
-# from matplotlib import animation
-# from matplotlib import syle
-# style.use('seaborn_whitegrid')
 
 class Position:
     def __init__(self, instrument, position_size, side):
@@ -129,10 +128,7 @@ class Pair:
         self.prices.loc[:, self.instrument] = data.closeAsk
         self.spreads.loc[:, self.instrument] = data.closeAsk - data.closeBid
         time = data.index[-1]
-        self.preds.loc[time, self.instrument], self.upper_preds.loc[time, self.instrument], \
-            self.lower_preds.loc[time, self.instrument], self.slopes.loc[time, self.instrument], \
-            self.intercepts.loc[time, self.instrument], self.stds.loc[time, self.instrument] = \
-            self.lin_reg()
+        self.lin_reg()
         print('Historical {0} Rates Download Complete.'.format(self.instrument))
         print('Running historical regression on {0}'.format(self.instrument))
         self.historical_lin_reg()
@@ -196,22 +192,14 @@ class Pair:
 
         if self.tick_count >= self.tick_update:
             self.tick_count = 0
-
-            self.preds.loc[time, symbol], self.upper_preds.loc[time, symbol], \
-            self.lower_preds.loc[time, symbol], self.slopes.loc[time, symbol], \
-            self.intercepts.loc[time, symbol], self.stds.loc[time, symbol] = \
-                self.lin_reg()
-
+            self.lin_reg()
 
         else:
             self.tick_count += 1
 
     def historical_lin_reg(self):  # TODO: try a kalman filter for beta/alpha, compare to OLS
-        resampled_prices = self.prices.resample(
-            self.resample_interval,
-            how='last',
-            fill_method="ffill")
-        # num_updates = resampled_prices.shape[0] - self.lookback_period
+        resampled_prices = self.prices.resample(self.resample_interval).last().ffill()
+
         for i in range(self.lookback_period):
             prices = resampled_prices[self.instrument].iloc[i - (2*self.lookback_period):i - self.lookback_period]
 
@@ -242,12 +230,9 @@ class Pair:
     def lin_reg(self):  # TODO: try a kalman filter for beta/alpha, compare to OLS
         # Running the linear regression
         # NOTE: timedelta64[s] changed to 's' for second increment
-        resampled_prices = self.prices.resample(
-            self.resample_interval,
-            how='last',
-            fill_method="ffill")
+        resampled_prices = self.prices.resample(self.resample_interval).last().ffill()
         prices = resampled_prices[self.instrument].iloc[-self.lookback_period:]
-
+        time = prices.index[-1]
         x = (prices.index - prices.index[0]).astype('timedelta64[s]').values
         x = sm.add_constant(x)
         y = prices.values
@@ -270,7 +255,10 @@ class Pair:
         self.current_upper_line = self.current_reg_line + self.std_multiplier * std
         self.current_lower_line = self.current_reg_line - self.std_multiplier * std
 
-        return pred, upper, lower, slope, intercept, std
+        self.preds.loc[time, self.instrument], self.upper_preds.loc[time, self.instrument], \
+        self.lower_preds.loc[time, self.instrument], self.slopes.loc[time, self.instrument], \
+        self.intercepts.loc[time, self.instrument], self.stds.loc[time, self.instrument] = \
+            pred, upper, lower, slope, intercept, std
 
 
 class Regressor_Reverter(opy.Streamer):
@@ -306,7 +294,6 @@ class Regressor_Reverter(opy.Streamer):
         # for updating plot/s
         self.plot_update_time = datetime.now()
 
-
         self.unrealized_pnl = 0 # TODO: unrealized pnl
         self.realized_pnl = 0
         self.position = 0
@@ -341,22 +328,11 @@ class Regressor_Reverter(opy.Streamer):
     def update_charts(self):
         counter = 0
         for symbol, pair in self.pairs.items():
-            resampled_prices = pair.prices.resample(
-                self.resample_interval,
-                how='last',
-                fill_method="ffill")
-            preds_resampled = pair.preds.resample(
-                self.resample_interval,
-                how='last',
-                fill_method="ffill")
-            upper_preds_resampled = pair.upper_preds.resample(
-                self.resample_interval,
-                how='last',
-                fill_method="ffill")
-            lower_preds_resampled = pair.lower_preds.resample(
-                self.resample_interval,
-                how='last',
-                fill_method="ffill")
+            resampled_prices = pair.prices.resample(self.resample_interval).last().ffill()
+            preds_resampled = pair.preds.resample(self.resample_interval).last().ffill()
+            upper_preds_resampled = pair.upper_preds.resample(self.resample_interval).last().ffill()
+            lower_preds_resampled = pair.lower_preds.resample(self.resample_interval).last().ffill()
+
             prices = resampled_prices[symbol].iloc[-self.lookback_period:]
             preds = preds_resampled[symbol].iloc[-self.lookback_period:]
             upper_preds = upper_preds_resampled[symbol].iloc[-self.lookback_period:]
