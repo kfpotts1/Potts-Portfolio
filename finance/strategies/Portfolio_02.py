@@ -90,7 +90,8 @@ class Pair:
         self.num_positions = 0
         self.running_profit = 0
         self.resample_interval = kwargs['resample_interval']
-        self.history_granularity = "S10"
+        self.history_granularity = 'M1' # "S10" #TODO: integrate with resample interval, only one necessary
+                                                # parse to correct form for pandas and oanda.
         self.lookback_period = kwargs['lookback_period']
         self.std_multiplier = kwargs['std_multiplier']
         self.dt_format = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -119,7 +120,7 @@ class Pair:
         print('Downloading {0} Historical Rates...'.format(self.instrument))
         resp = self.oanda.get_history(instrument=self.instrument,
                                       granularity=self.history_granularity,
-                                      count=5000)
+                                      count=2*self.lookback_period+10)  # 5000 max here
         data = pd.DataFrame(resp['candles'])
         data.set_index('time', inplace=True)
         data.index = [pd.datetime.strptime(x, self.dt_format) \
@@ -133,6 +134,9 @@ class Pair:
             self.intercepts.loc[time, self.instrument], self.stds.loc[time, self.instrument] = \
             self.lin_reg()
         print('Historical {0} Rates Download Complete.'.format(self.instrument))
+        print('Running historical regression on {0}'.format(self.instrument))
+        self.historical_lin_reg()
+        print('{0} Historical regression complete'.format(self.instrument))
 
     def open_new_position(self, size, side):
         if side == self.current_side or self.current_units == 0:  # check to make sure not illegal hedge position
@@ -202,7 +206,40 @@ class Pair:
         else:
             self.tick_count += 1
 
-    def lin_reg(self): # TODO: try a kalman filter for beta/alpha, compare to OLS
+    def historical_lin_reg(self):  # TODO: try a kalman filter for beta/alpha, compare to OLS
+        resampled_prices = self.prices.resample(
+            self.resample_interval,
+            how='last',
+            fill_method="ffill")
+        # num_updates = resampled_prices.shape[0] - self.lookback_period
+        for i in range(self.lookback_period):
+            prices = resampled_prices[self.instrument].iloc[i - (2*self.lookback_period):i - self.lookback_period]
+
+            time = prices.index[-1]
+            x = (prices.index - prices.index[0]).astype('timedelta64[s]').values
+            x = sm.add_constant(x)
+            y = prices.values
+            model = regression.linear_model.OLS(y, x).fit()
+            intercept = model.params[0]
+            slope = model.params[1]
+            x = x[:, 1]
+
+            y_hat = x * slope + intercept
+            pred = x[-1] * slope + intercept
+
+            std = (prices - y_hat).abs().std()
+
+            upper = pred + self.std_multiplier * std
+            lower = pred - self.std_multiplier * std
+
+            self.preds.loc[time, self.instrument] = pred
+            self.upper_preds.loc[time, self.instrument] = upper
+            self.lower_preds.loc[time, self.instrument] = lower
+            self.slopes.loc[time, self.instrument] = slope
+            self.intercepts.loc[time, self.instrument] = intercept
+            self.stds.loc[time, self.instrument] = std
+
+    def lin_reg(self):  # TODO: try a kalman filter for beta/alpha, compare to OLS
         # Running the linear regression
         # NOTE: timedelta64[s] changed to 's' for second increment
         resampled_prices = self.prices.resample(
@@ -247,7 +284,7 @@ class Regressor_Reverter(opy.Streamer):
         self.qty = 0
         self.resample_interval = '10s'
         self.history_granularity = "S10"
-        self.chart_update_seconds = 5
+        self.chart_update_seconds = 30
 
         self.lookback_period = 0
         self.std_multiplier = 0
@@ -353,16 +390,16 @@ class Regressor_Reverter(opy.Streamer):
 
             counter += 1
 
-        try:
-            self.fig.autofmt_xdate()
-            self.fig.canvas.draw()
-            self.fig.canvas.flush_events()
-        except:
-            print('error plotting')
-            pass  # TODO: determine issue with plotting, number of data points does not match
-                  # I believe to the issue has been resolved, will need to follow closely
+            try:
+                self.fig.autofmt_xdate()
+                self.fig.canvas.draw()
+                self.fig.canvas.flush_events()
+            except:
+                print('error plotting')
+                pass  # TODO: determine issue with plotting, number of data points does not match
+                      # I believe to the issue has been resolved, will need to follow closely
 
-        print('charts')
+        # print('update charts')
 
     def begin(self, **params):
         self.instruments = params["instruments"]
