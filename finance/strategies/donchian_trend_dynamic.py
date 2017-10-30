@@ -5,6 +5,9 @@
 #   It is an example of a donchian channel trend following algorithm with dynamic
 #   positition sizing that adjusts based on current volitility.
 # 
+#   This algorithm is a work in progress and is an base example of other similar
+#   algorithms that I am working on.
+# 
 #   For questions, conceerns, advice, feedback please email me at kfpotts1@gmail.com
 #
 #    You can view the QCAlgorithm base class on Github: 
