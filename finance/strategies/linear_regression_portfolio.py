@@ -5,7 +5,11 @@ Created by Kenneth Potts
 
 This is an algorithm written for the Zipline backtest and live trading platform created by Quantopian.
 It is still under development and I have many other versions of this in the works. If you have
-advise or feedback on this algorithm pla
+advise or feedback on this algorithm please email me at kfpotts1@gmail.com
+
+This algorithm currently uses a linear regression model, but the model can be replaced by any
+similar regression model including a neural network. It can also be modified to make a binary
+trading decision using a classifier such as a Support Vector Machine (SVM).
 """
 from quantopian.algorithm import attach_pipeline, pipeline_output
 from quantopian.pipeline import Pipeline
