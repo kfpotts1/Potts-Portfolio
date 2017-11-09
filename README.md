@@ -4,12 +4,13 @@ A Growing Collection of my work.
 This collection is always growing and improving! Keep checking in for more work!
 
 ### Machine Learning
- - Currently taking CS5780 Machine Learning for Inteligent Systems at Cornell University
+ - Took CS5780 Machine Learning for Inteligent Systems at Cornell University
    - Course focused on ML theory and math concepts: 
      - probability, statistics, MLE, MAP, Bayes Rule, bias/variance trade off, optimization and gradient descent
-   - Supervised learning, linear classifiers, kernelization, regularization, loss functions, feature selection
-   - Convolutional neural networks at the end of the semester
+   - Supervised learning, linear classifiers, kernelization, regularization, loss functions, feature selection, bias/variance trade off, regression, Gussian Process
+   - Neural networks, convolutional neural networks, feature learning
  - To see some of my work in machine learning, visit my [klml_supervised](https://github.com/kfpotts1/klml_supervised) repository.
+   - will work in the future to put more of my coursework in the klml_supervised project
  - Currently working in **Python**, looking into **Julia**
  
 ### Data Science
